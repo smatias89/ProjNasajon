@@ -47,7 +47,18 @@ foreach ($results as $obj) {
 
     $resp = @file_get_contents($ibgeApi);
 
-    if ($resp === FALSE || empty($resp)) {
+    // ERRO DE COMUNICAÇÃO COM A API
+    if ($resp === false) {
+        $obj->setMunicipioIbge("");
+        $obj->setUf("");
+        $obj->setRegiao("");
+        $obj->setIdIbge(0);
+        $obj->setStatus("ERRO_API");
+        continue;
+    }
+
+    // API RESPONDEU, MAS SEM CONTEÚDO
+    if (empty($resp)) {
         $obj->setMunicipioIbge("");
         $obj->setUf("");
         $obj->setRegiao("");
@@ -67,15 +78,21 @@ foreach ($results as $obj) {
         continue;
     }
 
-    ## buscar por macth
+    // buscar por match
     $found = false;
     $inputNorm = normalize($municipioInput);
+
     foreach ($data as $mun) {
         $munNorm = normalize($mun['nome']);
         if ($inputNorm === $munNorm) {
             $obj->setMunicipioIbge($mun['nome']);
-            $obj->setUf($mun['microrregiao']['mesorregiao']['UF']['sigla']);
-            $obj->setRegiao($mun['microrregiao']['mesorregiao']['UF']['regiao']['nome']);
+            $ufData = $mun['microrregiao']['mesorregiao']['UF'] ?? null;
+
+            $ufSigla = $ufData['sigla'] ?? '';
+            $regiaoNome = $ufData['regiao']['nome'] ?? '';
+
+            $obj->setUf($ufSigla);
+            $obj->setRegiao($regiaoNome);
             $obj->setIdIbge($mun['id']);
             $obj->setStatus("OK");
             $found = true;
@@ -84,7 +101,6 @@ foreach ($results as $obj) {
     }
 
     if (!$found) {
-        ## se match exato então set: NAO_ENCONTRADO
         $obj->setMunicipioIbge("");
         $obj->setUf("");
         $obj->setRegiao("");
@@ -103,7 +119,15 @@ $outputCsv = $outputDir . "resultado" . ".csv";
 $fp = fopen($outputCsv, 'w');
 
 ## inclusão do cabeçalho
-fputcsv($fp, ['Municipio','População','IBGE','UF','Região','ID IBGE','Status']);
+fputcsv($fp, [
+    'municipio_input',
+    'populacao_input',
+    'municipio_ibge',
+    'uf',
+    'regiao',
+    'id_ibge',
+    'status'
+]);
 
 ## foreach para preencher corretamente cada uma das linhas do CSV
 foreach ($results as $obj) {
@@ -116,7 +140,7 @@ foreach ($results as $obj) {
 
     fputcsv($fp, [
         $obj->getMunicipality(),
-        $obj->getPopulation(),
+        (int)$obj->getPopulation(),
         $municipioIbge,
         $uf,
         $regiao,
@@ -125,6 +149,7 @@ foreach ($results as $obj) {
     ]);
 }
 fclose($fp);
+
 ## inicio dos calculos de estatística
 $stats = [
     'total_municipios' => count($results),
@@ -139,30 +164,53 @@ $regiaoPop = [];
 $regiaoCount = [];
 
 foreach ($results as $obj) {
+
     $status = $obj->getStatus();
-    $pop = (int)$obj->getPopulation();
-    $regiao = $obj->getRegiao();
 
-    if ($status === 'OK') {
-        $stats['total_ok']++;
-        $stats['pop_total_ok'] += $pop;
-
-        if (!isset($regiaoPop[$regiao])) {
-            $regiaoPop[$regiao] = 0;
-            $regiaoCount[$regiao] = 0;
+    // Trata primeiro tudo que NÃO é OK
+    if ($status !== 'OK') {
+        if ($status === 'NAO_ENCONTRADO') {
+            $stats['total_nao_encontrado']++;
+        } elseif ($status === 'ERRO_API') {
+            $stats['total_erro_api']++;
         }
-        $regiaoPop[$regiao] += $pop;
-        $regiaoCount[$regiao]++;
-    } elseif ($status === 'NAO_ENCONTRADO') {
-        $stats['total_nao_encontrado']++;
-    } elseif ($status === 'ERRO_API') {
-        $stats['total_erro_api']++;
+        continue;
     }
+
+    // A partir daqui só entra quem é OK
+    $stats['total_ok']++;
+
+    $pop = (int)$obj->getPopulation();
+$regiao = trim($obj->getRegiao());
+
+// pop_total_ok SEMPRE soma se for OK
+$stats['pop_total_ok'] += $pop;
+
+// média por região só se região existir
+if ($regiao !== '') {
+    if (!isset($regiaoPop[$regiao])) {
+        $regiaoPop[$regiao] = 0;
+        $regiaoCount[$regiao] = 0;
+    }
+
+    $regiaoPop[$regiao] += $pop;
+    $regiaoCount[$regiao]++;
 }
 
-## calculo da média por região
+    if (!isset($regiaoPop[$regiao])) {
+        $regiaoPop[$regiao] = 0;
+        $regiaoCount[$regiao] = 0;
+    }
+
+    $regiaoPop[$regiao] += $pop;
+    $regiaoCount[$regiao]++;
+}
+
+## calculo da média por região (com proteção contra divisão por zero)
 foreach ($regiaoPop as $r => $totalPop) {
-    $stats['medias_por_regiao'][$r] = round($totalPop / $regiaoCount[$r], 2);
+    if (isset($regiaoCount[$r]) && $regiaoCount[$r] > 0) {
+        $stats['medias_por_regiao'][$r] = $totalPop / $regiaoCount[$r];
+    }
 }
 
 ## salva JSON no formato
@@ -208,7 +256,7 @@ echo "</div>";
 
 $jsonPayload = json_encode(['stats' => $stats]);
 
-// var_dump($jsonPayload); para confirmar o tipo e o arquivo
+//var_dump($jsonPayload); para confirmar o tipo e o arquivo
 
 $projectFunctionUrl = "https://mynxlubykylncinttggu.functions.supabase.co/ibge-submit";
 $accessToken = "eyJhbGciOiJIUzI1NiIsImtpZCI6ImR0TG03UVh1SkZPVDJwZEciLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL215bnhsdWJ5a3lsbmNpbnR0Z2d1LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIwNTgxM2E4ZS00MTkxLTRlOTUtYmM1MC04YzY4NGQ3MzE2ODIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY4NjAzOTM2LCJpYXQiOjE3Njg2MDAzMzYsImVtYWlsIjoic2F1bG8uZW5nbWF0aWFzQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJzYXVsby5lbmdtYXRpYXNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5vbWUiOiJTYXVsbyBNYXRpYXMgQ29zdGEiLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6IjA1ODEzYThlLTQxOTEtNGU5NS1iYzUwLThjNjg0ZDczMTY4MiJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzY4NjAwMzM2fV0sInNlc3Npb25faWQiOiJhMTZjYzA5NS0yZjU4LTQ1ZTktODllOC1hYThjOWRmNTgxYjIiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.ZOOlgDURb4ikLECCNE1yeH28xnIpl4pn8UNC7iIQJ-0"; 
