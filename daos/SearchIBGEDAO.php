@@ -15,11 +15,7 @@ class SearchIBGEDAO {
             self::$instance = new SearchIBGEDAO();
         return self::$instance;
     }
-
-    /**
-     * Cria um objeto SearchIBGE a partir de uma linha de CSV
-     * $row = [0 => 'municipio', 1 => 'populacao']
-     */
+## Cria um objeto SearchIBGE a partir de uma linha de CSV $row = [0 => 'municipio', 1 => 'populacao'] 
     public function fillFromCSV($row) {
         $obj = new SearchIBGE();
         $obj->setMunicipality($row[0]);
@@ -33,10 +29,7 @@ class SearchIBGEDAO {
         return $obj;
     }
 
-    /**
-     * Cria um objeto SearchIBGE a partir de JSON
-     * $json = objeto ou stdClass
-     */
+    ##  Cria um objeto SearchIBGE a partir de JSON $json = objeto ou stdClass
     public function fillFromJSON($json) {
         $obj = new SearchIBGE();
 
@@ -65,9 +58,7 @@ class SearchIBGEDAO {
         return $obj;
     }
 
-    /**
-     * Converte um array de CSV em array de objetos SearchIBGE
-     */
+    ## Converte um array de CSV em array de objetos SearchIBGE
     public function listFromCSV($csvData) {
         $list = [];
         foreach ($csvData as $row) {
@@ -76,9 +67,8 @@ class SearchIBGEDAO {
         return $list;
     }
 
-    /**
-     * Converte um array de JSON em array de objetos SearchIBGE
-     */
+    ## Converte um array de JSON em array de objetos SearchIBGE
+   
     public function listFromJSON($jsonArray) {
         $list = [];
         foreach ($jsonArray as $json) {

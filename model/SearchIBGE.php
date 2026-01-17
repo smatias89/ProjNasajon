@@ -1,15 +1,15 @@
 <?php
 
 class SearchIBGE implements JsonSerializable { 
-    private $municipality;       // nome original do CSV
-    private $population;         // população do CSV
-    private $municipio_ibge;     // nome oficial do IBGE
-    private $uf;                 // sigla do estado
-    private $regiao;             // região do Brasil
-    private $id_ibge;            // código do IBGE
-    private $status;             // OK, NAO_ENCONTRADO, ERRO_API, AMBIGUO
+    private $municipality;       ## nome original 
+    private $population;         ## população 
+    private $municipio_ibge;     ## nome oficial do IBGE
+    private $uf;                 ## sigla do estado
+    private $regiao;             ## região do Brasil
+    private $id_ibge;            ## código do IBGE
+    private $status;             ## OK, NAO_ENCONTRADO, ERRO_API, AMBIGUO
 
-    // JsonSerialize para transformar em JSON
+    ## JsonSerialize para transformar em JSON
     public function jsonSerialize() {
         return [
             'municipality' => $this->municipality,
@@ -22,7 +22,7 @@ class SearchIBGE implements JsonSerializable {
         ];
     }
 
-    // GETTERS e SETTERS
+    ## GETTERS e SETTERS
     public function getMunicipality() {
         return $this->municipality;
     }
