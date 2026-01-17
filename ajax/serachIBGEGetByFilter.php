@@ -210,41 +210,6 @@ $jsonPayload = json_encode(['stats' => $stats]);
 
 // var_dump($jsonPayload); para confirmar o tipo e o arquivo
 
-<<<<<<< HEAD
-// $projectFunctionUrl = "https://mynxlubykylncinttggu.functions.supabase.co/ibge-submit";
-// $accessToken = "eyJhbGciOiJIUzI1NiIsImtpZCI6ImR0TG03UVh1SkZPVDJwZEciLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL215bnhsdWJ5a3lsbmNpbnR0Z2d1LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIwNTgxM2E4ZS00MTkxLTRlOTUtYmM1MC04YzY4NGQ3MzE2ODIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY4NjAzOTM2LCJpYXQiOjE3Njg2MDAzMzYsImVtYWlsIjoic2F1bG8uZW5nbWF0aWFzQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJzYXVsby5lbmdtYXRpYXNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5vbWUiOiJTYXVsbyBNYXRpYXMgQ29zdGEiLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6IjA1ODEzYThlLTQxOTEtNGU5NS1iYzUwLThjNjg0ZDczMTY4MiJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzY4NjAwMzM2fV0sInNlc3Npb25faWQiOiJhMTZjYzA5NS0yZjU4LTQ1ZTktODllOC1hYThjOWRmNTgxYjIiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.ZOOlgDURb4ikLECCNE1yeH28xnIpl4pn8UNC7iIQJ-0"; 
-
-
-// $ch = curl_init($projectFunctionUrl);
-// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-// curl_setopt($ch, CURLOPT_HTTPHEADER, [
-//     "Authorization: Bearer $accessToken",
-//     "Content-Type: application/json"
-// ]);
-// curl_setopt($ch, CURLOPT_POST, true);
-// curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonPayload);
-
-// $response = curl_exec($ch);
-// $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-// if ($response === false) {
-//     echo "Erro ao enviar os dados: " . curl_error($ch);
-// } elseif ($httpCode >= 400) {
-//     echo "Erro na API. Código HTTP: $httpCode. Resposta: $response";
-// } else {
-//     $respData = json_decode($response, true);
-//     if ($respData && isset($respData['score'])) {
-//         echo "<div class='alert alert-info mt-3'>";
-//         echo "Score recebido: " . $respData['score'] . "<br>";
-//         echo "Feedback: " . ($respData['feedback'] ?? 'Sem feedback');
-//         echo "</div>";
-//     } else {
-//         echo "Resposta inesperada da API: $response";
-//     }
-// }
-
-// curl_close($ch);
-=======
 $projectFunctionUrl = "https://mynxlubykylncinttggu.functions.supabase.co/ibge-submit";
 $accessToken = "eyJhbGciOiJIUzI1NiIsImtpZCI6ImR0TG03UVh1SkZPVDJwZEciLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL215bnhsdWJ5a3lsbmNpbnR0Z2d1LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIwNTgxM2E4ZS00MTkxLTRlOTUtYmM1MC04YzY4NGQ3MzE2ODIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY4NjAzOTM2LCJpYXQiOjE3Njg2MDAzMzYsImVtYWlsIjoic2F1bG8uZW5nbWF0aWFzQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJzYXVsby5lbmdtYXRpYXNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5vbWUiOiJTYXVsbyBNYXRpYXMgQ29zdGEiLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6IjA1ODEzYThlLTQxOTEtNGU5NS1iYzUwLThjNjg0ZDczMTY4MiJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzY4NjAwMzM2fV0sInNlc3Npb25faWQiOiJhMTZjYzA5NS0yZjU4LTQ1ZTktODllOC1hYThjOWRmNTgxYjIiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.ZOOlgDURb4ikLECCNE1yeH28xnIpl4pn8UNC7iIQJ-0"; 
 
@@ -278,4 +243,3 @@ if ($response === false) {
 }
 
 curl_close($ch);
->>>>>>> df6e21b (commit 2)
